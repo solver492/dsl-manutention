@@ -2,7 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { BarChart, LineChart, PieChart, Users, Truck, DollarSign, TrendingUp, Download, Settings2 } from 'lucide-react';
+import { Users, Truck, DollarSign, TrendingUp, Download, Settings2 } from 'lucide-react';
+import { Line, Bar, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 import { motion } from 'framer-motion';
 import {
   Select,
@@ -39,10 +64,61 @@ const ReportCard = ({ title, value, icon, description, chartType }) => {
         <CardContent>
           <div className="text-2xl font-bold text-foreground">{value}</div>
           <p className="text-xs text-muted-foreground">{description}</p>
-          <div className="mt-4 h-32 bg-muted/50 dark:bg-muted/20 rounded-md flex items-center justify-center">
-            <ChartIcon className="h-16 w-16 text-primary/30" />
+          <div className="mt-4 h-32 bg-background rounded-md">
+            {title === "Chiffre d'Affaires Total" && (
+              <Line
+                data={{
+                  labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+                  datasets: [{
+                    label: 'CA Mensuel',
+                    data: [12000, 19000, 15000, 25000, 22000, value.replace('€','').trim()],
+                    borderColor: 'rgb(99, 102, 241)',
+                    tension: 0.3
+                  }]
+                }}
+                options={{ responsive: true, maintainAspectRatio: false }}
+              />
+            )}
+            {title === "Prestations par Équipe" && (
+              <Bar
+                data={{
+                  labels: ['Équipe A', 'Équipe B', 'Équipe C'],
+                  datasets: [{
+                    label: 'Prestations',
+                    data: [45, 38, 32],
+                    backgroundColor: 'rgba(99, 102, 241, 0.5)'
+                  }]
+                }}
+                options={{ responsive: true, maintainAspectRatio: false }}
+              />
+            )}
+            {title === "Taux d'Occupation Véhicules" && (
+              <Pie
+                data={{
+                  labels: ['Occupé', 'Disponible'],
+                  datasets: [{
+                    data: [parseInt(value), 100-parseInt(value)],
+                    backgroundColor: ['rgba(99, 102, 241, 0.5)', 'rgba(200, 200, 200, 0.5)']
+                  }]
+                }}
+                options={{ responsive: true, maintainAspectRatio: false }}
+              />
+            )}
+            {title === "Satisfaction Client" && (
+              <Line
+                data={{
+                  labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+                  datasets: [{
+                    label: 'Note moyenne',
+                    data: [4.2, 4.4, 4.5, 4.6, 4.6, parseFloat(value)],
+                    borderColor: 'rgb(99, 102, 241)',
+                    tension: 0.3
+                  }]
+                }}
+                options={{ responsive: true, maintainAspectRatio: false }}
+              />
+            )}
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center">Graphique de {title.toLowerCase()}</p>
         </CardContent>
       </Card>
     </motion.div>
