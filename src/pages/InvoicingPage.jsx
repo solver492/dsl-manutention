@@ -116,6 +116,61 @@ const InvoicingPage = () => {
     setIsDeleting(true);
   };
 
+  const handleViewInvoice = (invoice) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Facture ${invoice.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .invoice-details { margin-bottom: 20px; }
+            .client-details { margin-bottom: 20px; }
+            .amounts { margin-top: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>FACTURE</h1>
+            <h2>${invoice.id}</h2>
+          </div>
+          <div class="invoice-details">
+            <p><strong>Date d'émission:</strong> ${format(new Date(invoice.dateEmission), "dd/MM/yyyy", { locale: fr })}</p>
+            <p><strong>Date d'échéance:</strong> ${format(new Date(invoice.dateEcheance), "dd/MM/yyyy", { locale: fr })}</p>
+          </div>
+          <div class="client-details">
+            <h3>Client</h3>
+            <p>${invoice.client}</p>
+          </div>
+          <div class="amounts">
+            <table>
+              <tr>
+                <th>Montant HT</th>
+                <td>${invoice.montantHT.toFixed(2)} €</td>
+              </tr>
+              <tr>
+                <th>TVA (20%)</th>
+                <td>${invoice.tva.toFixed(2)} €</td>
+              </tr>
+              <tr>
+                <th>Montant TTC</th>
+                <td>${invoice.montantTTC.toFixed(2)} €</td>
+              </tr>
+            </table>
+          </div>
+          <div class="status">
+            <p><strong>Statut:</strong> ${invoice.statut}</p>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+  };
+
   const confirmDelete = () => {
     const updatedInvoices = invoices.filter(inv => inv.id !== invoiceToDelete.id);
     setInvoices(updatedInvoices);
@@ -216,7 +271,7 @@ const InvoicingPage = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => toast({ title: "Visualisation non implémentée", description: "Cette fonctionnalité sera bientôt disponible."})}>
+              <DropdownMenuItem onClick={() => handleViewInvoice(invoice)}>
                 <Eye className="mr-2 h-4 w-4" /> Visualiser
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
