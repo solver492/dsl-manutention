@@ -40,13 +40,19 @@ const ClientSitesPage = () => {
   const [clientToDelete, setClientToDelete] = useState(null);
   const { toast } = useToast();
 
-  const loadClients = useCallback(() => {
-    const storedClients = localStorage.getItem('clients');
-    if (storedClients) {
-      setClients(JSON.parse(storedClients));
-    } else {
-      setClients(defaultInitialClients);
-      localStorage.setItem('clients', JSON.stringify(defaultInitialClients));
+  const loadClients = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/clients');
+      if (!response.ok) throw new Error('Erreur lors du chargement des clients');
+      const data = await response.json();
+      setClients(data);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les clients",
+        variant: "destructive"
+      });
     }
   }, []);
 

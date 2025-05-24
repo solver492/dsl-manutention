@@ -1,9 +1,30 @@
 
-import express from 'express';
-import dbService from './services/dbService.js';
+const express = require('express');
+const dbService = require('./services/dbService');
 const app = express();
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
+
+// Routes pour les clients
+app.get('/api/clients', (req, res) => {
+  try {
+    const clients = dbService.getAllClients();
+    res.json(clients);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/clients', (req, res) => {
+  try {
+    const id = dbService.createClient(req.body);
+    res.status(201).json({ id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Routes Clients
 app.get('/api/clients', (req, res) => {
