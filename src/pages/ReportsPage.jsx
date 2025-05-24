@@ -200,19 +200,104 @@ const ReportsPage = () => {
           <head>
             <title>Rapport - ${reportDetails.type}</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              h1 { color: #333; }
-              .section { margin: 20px 0; }
-              .chart { margin: 15px 0; }
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 40px;
+                color: #333;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #6366f1;
+                padding-bottom: 20px;
+              }
+              h1 { 
+                color: #2c3e50;
+                margin: 0;
+                font-size: 24px;
+              }
+              .metadata {
+                color: #666;
+                font-size: 14px;
+                margin-top: 10px;
+              }
+              .section {
+                margin: 30px 0;
+                padding: 20px;
+                background: #f8fafc;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              .section h2 {
+                color: #4f46e5;
+                font-size: 18px;
+                margin-top: 0;
+              }
+              .data-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                margin-top: 20px;
+              }
+              .data-item {
+                padding: 15px;
+                background: white;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+              }
+              .data-item strong {
+                display: block;
+                margin-bottom: 5px;
+                color: #4f46e5;
+              }
+              .footer {
+                margin-top: 40px;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 20px;
+              }
             </style>
           </head>
           <body>
-            <h1>Rapport - ${reportDetails.type}</h1>
-            <div class="section">
-              <p><strong>Période:</strong> ${reportDetails.period}</p>
-              <p><strong>Données analysées:</strong> ${reportDetails.points}</p>
-              <p><strong>Généré le:</strong> ${reportDetails.generatedAt}</p>
+            <div class="header">
+              <h1>Rapport - ${reportDetails.type}</h1>
+              <div class="metadata">
+                Généré le ${reportDetails.generatedAt}
+              </div>
             </div>
+
+            <div class="section">
+              <h2>Informations Générales</h2>
+              <div class="data-grid">
+                <div class="data-item">
+                  <strong>Période d'analyse</strong>
+                  ${reportDetails.period}
+                </div>
+                <div class="data-item">
+                  <strong>Type de rapport</strong>
+                  ${reportDetails.type}
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Données Analysées</h2>
+              <div class="data-grid">
+                ${reportDetails.points.split(', ').map(point => `
+                  <div class="data-item">
+                    <strong>${point}</strong>
+                    ${selectedDataPoints.includes(point) ? 'Inclus dans l\'analyse' : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="footer">
+              Mon Auxiliaire de Déménagement - Document confidentiel
+            </div>
+
             <script>
               window.print();
               window.onafterprint = () => window.close();
