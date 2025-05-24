@@ -1,6 +1,6 @@
 
-const express = require('express');
-const dbService = require('./services/dbService');
+import express from 'express';
+import dbService from './services/dbService.js';
 const app = express();
 
 app.use(express.json());

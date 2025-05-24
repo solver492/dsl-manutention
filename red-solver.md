@@ -10,8 +10,22 @@
 - Framer Motion pour les animations
 
 ### Stockage de Données (État Actuel)
-- Actuellement, l'application utilise le `localStorage` du navigateur pour simuler une base de données
-- Cette solution est temporaire et destinée uniquement à des fins de démonstration
+- L'application utilise SQLite comme base de données via better-sqlite3
+- La base de données est stockée localement dans le fichier `database.sqlite`
+- Structure complète de la base de données implémentée avec les tables:
+  - clients
+  - employes
+  - vehicules
+  - prestations
+  - factures
+  - prestation_employes
+  - prestation_vehicules
+
+### Configuration SQLite
+- Utilisation de better-sqlite3 pour des performances optimales
+- Base de données fichier unique (`database.sqlite`)
+- Support complet des transactions ACID
+- Schéma relationnel avec clés étrangères
 
 ### Recommandation pour la Production
 - **Supabase** est recommandé comme solution de base de données
