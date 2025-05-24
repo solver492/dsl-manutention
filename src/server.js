@@ -1,4 +1,3 @@
-
 const express = require('express');
 const dbService = require('./services/dbService');
 const app = express();
@@ -57,6 +56,21 @@ app.get('/api/prestations', (req, res) => {
 app.post('/api/prestations', (req, res) => {
   const id = dbService.createPrestation(req.body);
   res.json({ id });
+});
+
+app.get('/api/reports', async (req, res) => {
+  try {
+    const timeRange = req.query.timeRange || 'last30days';
+    const data = await getReportData(timeRange);
+    res.json(data);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données des rapports:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+app.get('/api/profile', async (req, res) => {
+
 });
 
 const PORT = process.env.PORT || 3001;

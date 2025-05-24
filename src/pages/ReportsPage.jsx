@@ -1,4 +1,7 @@
+The code is modified to fetch report data from an API endpoint based on the selected time range and updates the state with the retrieved data.
+```
 
+```replit_final_file
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -153,7 +156,32 @@ const ReportsPage = () => {
   const [selectedReportType, setSelectedReportType] = useState("");
   const [selectedDataPoints, setSelectedDataPoints] = useState([]);
   const [exportFormat, setExportFormat] = useState("pdf");
+  const [reportData, setReportData] = useState({
+    revenue: [],
+    teamPerformance: [],
+    occupancyRate: 0,
+    clientSatisfaction: []
+  });
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchReportData = async () => {
+      try {
+        const response = await fetch(`/api/reports?timeRange=${timeRange}`);
+        const data = await response.json();
+        setReportData(data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les données des rapports",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchReportData();
+  }, [timeRange]);
 
   const handleDataPointChange = (pointId) => {
     setSelectedDataPoints(prev =>
@@ -354,7 +382,7 @@ const ReportsPage = () => {
     }]
   };
 
-  const reportData = {
+  const reportDataPlaceholder = {
     financial: {
       title: "Chiffre d'Affaires Total",
       value: "75,890 €",
@@ -413,10 +441,10 @@ const ReportsPage = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-        <ReportCard {...reportData.financial} />
-        <ReportCard {...reportData.teamPerformance} />
-        <ReportCard {...reportData.occupancyRate} />
-        <ReportCard {...reportData.clientSatisfaction} />
+        <ReportCard {...reportDataPlaceholder.financial} />
+        <ReportCard {...reportDataPlaceholder.teamPerformance} />
+        <ReportCard {...reportDataPlaceholder.occupancyRate} />
+        <ReportCard {...reportDataPlaceholder.clientSatisfaction} />
       </div>
 
       <Card className="shadow-xl border-none bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
@@ -465,7 +493,7 @@ const ReportsPage = () => {
               </div>
             </div>
           )}
-          
+
           <div className="flex justify-end">
             <Button onClick={generateAndDownloadReport} className="w-full md:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-primary-foreground">
               <Download className="mr-2 h-4 w-4" /> Générer le Rapport
