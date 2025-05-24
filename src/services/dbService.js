@@ -60,7 +60,7 @@ const dbService = {
     );
     return id;
   },
-  getReportData: async function (timeRange) {
+  export const getReportData = async (timeRange) => {
     //const db = await openDB(); // Assuming openDB is defined elsewhere to open your SQLite database
   
     // Calculer la date de début en fonction de la plage de temps
