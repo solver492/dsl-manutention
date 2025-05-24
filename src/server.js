@@ -1,9 +1,8 @@
 
-import express from 'express';
-import cors from 'cors';
-import { getAllClients, createClient, getAllEmployes, createEmploye, getAllPrestations, createPrestation, getReportData } from './services/dbService.js';
-
+const express = require('express');
+const dbService = require('./services/dbService');
 const app = express();
+const cors = require('cors');
 
 app.use(cors());
 app.use(express.json());
@@ -11,7 +10,7 @@ app.use(express.json());
 // Routes pour les clients
 app.get('/api/clients', (req, res) => {
   try {
-    const clients = getAllClients();
+    const clients = dbService.getAllClients();
     res.json(clients);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -20,60 +19,44 @@ app.get('/api/clients', (req, res) => {
 
 app.post('/api/clients', (req, res) => {
   try {
-    const id = createClient(req.body);
+    const id = dbService.createClient(req.body);
     res.status(201).json({ id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// Routes Clients
+app.get('/api/clients', (req, res) => {
+  const clients = dbService.getAllClients();
+  res.json(clients);
+});
+
+app.post('/api/clients', (req, res) => {
+  const id = dbService.createClient(req.body);
+  res.json({ id });
+});
+
 // Routes Employés
 app.get('/api/employes', (req, res) => {
-  try {
-    const employes = getAllEmployes();
-    res.json(employes);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  const employes = dbService.getAllEmployes();
+  res.json(employes);
 });
 
 app.post('/api/employes', (req, res) => {
-  try {
-    const id = createEmploye(req.body);
-    res.json({ id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  const id = dbService.createEmploye(req.body);
+  res.json({ id });
 });
 
 // Routes Prestations
 app.get('/api/prestations', (req, res) => {
-  try {
-    const prestations = getAllPrestations();
-    res.json(prestations);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  const prestations = dbService.getAllPrestations();
+  res.json(prestations);
 });
 
 app.post('/api/prestations', (req, res) => {
-  try {
-    const id = createPrestation(req.body);
-    res.json({ id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/reports', async (req, res) => {
-  try {
-    const timeRange = req.query.timeRange || 'last30days';
-    const data = await getReportData(timeRange);
-    res.json(data);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données des rapports:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+  const id = dbService.createPrestation(req.body);
+  res.json({ id });
 });
 
 const PORT = process.env.PORT || 3001;
