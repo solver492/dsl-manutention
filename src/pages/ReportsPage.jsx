@@ -161,7 +161,7 @@ const ReportsPage = () => {
     );
   };
 
-  const generateReport = () => {
+  const generateAndDownloadReport = () => {
     if (!selectedReportType || selectedDataPoints.length === 0) {
       toast({
         title: "Configuration incomplète",
@@ -170,7 +170,7 @@ const ReportsPage = () => {
       });
       return;
     }
-    // Simulation de la génération de rapport
+
     const reportDetails = {
       type: reportTypes.find(rt => rt.value === selectedReportType)?.label,
       points: selectedDataPoints.map(dp => dataPointsOptions[selectedReportType]?.find(opt => opt.id === dp)?.label).join(', '),
@@ -179,10 +179,54 @@ const ReportsPage = () => {
       generatedAt: format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr }),
     };
 
+    // Créer le contenu du rapport
+    let content = '';
+    const currentDate = format(new Date(), "dd-MM-yyyy_HH-mm", { locale: fr });
+    const fileName = `rapport_${selectedReportType}_${currentDate}.${exportFormat}`;
+
+    // Générer le contenu selon le format
+    if (exportFormat === 'csv') {
+      content = `Type de rapport,${reportDetails.type}\nPériode,${reportDetails.period}\nDonnées,${reportDetails.points}\nDate de génération,${reportDetails.generatedAt}\n`;
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    } else if (exportFormat === 'pdf') {
+      // Pour PDF, on ouvre dans une nouvelle fenêtre pour l'impression
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Rapport - ${reportDetails.type}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h1 { color: #333; }
+              .section { margin: 20px 0; }
+              .chart { margin: 15px 0; }
+            </style>
+          </head>
+          <body>
+            <h1>Rapport - ${reportDetails.type}</h1>
+            <div class="section">
+              <p><strong>Période:</strong> ${reportDetails.period}</p>
+              <p><strong>Données analysées:</strong> ${reportDetails.points}</p>
+              <p><strong>Généré le:</strong> ${reportDetails.generatedAt}</p>
+            </div>
+            <script>
+              window.print();
+              window.onafterprint = () => window.close();
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
     toast({
       title: "Rapport généré",
-      description: `Type: ${reportDetails.type}. Données: ${reportDetails.points}. Période: ${reportDetails.period}. Format: ${reportDetails.format}.`,
-      action: <Button variant="outline" size="sm" onClick={() => console.log('Download report')}>Télécharger</Button>
+      description: `Type: ${reportDetails.type}. Format: ${reportDetails.format}.`,
+      variant: "success"
     });
   };
 
@@ -338,7 +382,7 @@ const ReportsPage = () => {
           )}
           
           <div className="flex justify-end">
-            <Button onClick={generateReport} className="w-full md:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-primary-foreground">
+            <Button onClick={generateAndDownloadReport} className="w-full md:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-primary-foreground">
               <Download className="mr-2 h-4 w-4" /> Générer le Rapport
             </Button>
           </div>
