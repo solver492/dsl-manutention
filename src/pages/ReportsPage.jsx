@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   Legend
 } from 'chart.js';
 
+// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,6 +30,7 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
 import { motion } from 'framer-motion';
 import {
   Select,
@@ -41,14 +44,45 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const ReportCard = ({ title, value, icon, description, chartType }) => {
-  let ChartIcon;
-  switch (chartType) {
-    case 'bar': ChartIcon = BarChart; break;
-    case 'line': ChartIcon = LineChart; break;
-    case 'pie': ChartIcon = PieChart; break;
-    default: ChartIcon = TrendingUp;
-  }
+const ReportCard = ({ title, value, icon, description, chartType, data }) => {
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom'
+      }
+    }
+  };
+
+  const renderChart = () => {
+    switch (chartType) {
+      case 'line':
+        return (
+          <Line
+            data={data}
+            options={chartOptions}
+          />
+        );
+      case 'bar':
+        return (
+          <Bar
+            data={data}
+            options={chartOptions}
+          />
+        );
+      case 'pie':
+        return (
+          <Pie
+            data={data}
+            options={chartOptions}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <motion.div
@@ -64,60 +98,8 @@ const ReportCard = ({ title, value, icon, description, chartType }) => {
         <CardContent>
           <div className="text-2xl font-bold text-foreground">{value}</div>
           <p className="text-xs text-muted-foreground">{description}</p>
-          <div className="mt-4 h-32 bg-background rounded-md">
-            {title === "Chiffre d'Affaires Total" && (
-              <Line
-                data={{
-                  labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
-                  datasets: [{
-                    label: 'CA Mensuel',
-                    data: [12000, 19000, 15000, 25000, 22000, value.replace('€','').trim()],
-                    borderColor: 'rgb(99, 102, 241)',
-                    tension: 0.3
-                  }]
-                }}
-                options={{ responsive: true, maintainAspectRatio: false }}
-              />
-            )}
-            {title === "Prestations par Équipe" && (
-              <Bar
-                data={{
-                  labels: ['Équipe A', 'Équipe B', 'Équipe C'],
-                  datasets: [{
-                    label: 'Prestations',
-                    data: [45, 38, 32],
-                    backgroundColor: 'rgba(99, 102, 241, 0.5)'
-                  }]
-                }}
-                options={{ responsive: true, maintainAspectRatio: false }}
-              />
-            )}
-            {title === "Taux d'Occupation Véhicules" && (
-              <Pie
-                data={{
-                  labels: ['Occupé', 'Disponible'],
-                  datasets: [{
-                    data: [parseInt(value), 100-parseInt(value)],
-                    backgroundColor: ['rgba(99, 102, 241, 0.5)', 'rgba(200, 200, 200, 0.5)']
-                  }]
-                }}
-                options={{ responsive: true, maintainAspectRatio: false }}
-              />
-            )}
-            {title === "Satisfaction Client" && (
-              <Line
-                data={{
-                  labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
-                  datasets: [{
-                    label: 'Note moyenne',
-                    data: [4.2, 4.4, 4.5, 4.6, 4.6, parseFloat(value)],
-                    borderColor: 'rgb(99, 102, 241)',
-                    tension: 0.3
-                  }]
-                }}
-                options={{ responsive: true, maintainAspectRatio: false }}
-              />
-            )}
+          <div className="mt-4 h-32 bg-background rounded-md p-2">
+            {renderChart()}
           </div>
         </CardContent>
       </Card>
@@ -135,27 +117,36 @@ const reportTypes = [
 
 const dataPointsOptions = {
   financial_summary: [
-    { id: "revenue", label: "Revenus Totaux" }, { id: "expenses", label: "Dépenses Opérationnelles" },
-    { id: "profit_margin", label: "Marge Bénéficiaire" }, { id: "avg_invoice_value", label: "Valeur Moyenne Facture" }
+    { id: "revenue", label: "Revenus Totaux" },
+    { id: "expenses", label: "Dépenses Opérationnelles" },
+    { id: "profit_margin", label: "Marge Bénéficiaire" },
+    { id: "avg_invoice_value", label: "Valeur Moyenne Facture" }
   ],
   operational_efficiency: [
-    { id: "completed_jobs", label: "Prestations Terminées" }, { id: "avg_job_duration", label: "Durée Moyenne Prestation" },
-    { id: "on_time_rate", label: "Taux de Ponctualité" }, { id: "jobs_per_team", label: "Prestations par Équipe" }
+    { id: "completed_jobs", label: "Prestations Terminées" },
+    { id: "avg_job_duration", label: "Durée Moyenne Prestation" },
+    { id: "on_time_rate", label: "Taux de Ponctualité" },
+    { id: "jobs_per_team", label: "Prestations par Équipe" }
   ],
   customer_insights: [
-    { id: "new_customers", label: "Nouveaux Clients" }, { id: "customer_retention_rate", label: "Taux de Rétention Client" },
-    { id: "avg_customer_rating", label: "Note Moyenne Client" }, { id: "top_customer_sources", label: "Principales Sources Clients" }
+    { id: "new_customers", label: "Nouveaux Clients" },
+    { id: "customer_retention_rate", label: "Taux de Rétention Client" },
+    { id: "avg_customer_rating", label: "Note Moyenne Client" },
+    { id: "top_customer_sources", label: "Principales Sources Clients" }
   ],
-   employee_performance: [
-    { id: "jobs_per_employee", label: "Prestations par Employé" }, { id: "employee_satisfaction", label: "Satisfaction Employés" },
-    { id: "overtime_hours", label: "Heures Supplémentaires" }, { id: "training_completed", label: "Formations Terminées" }
+  employee_performance: [
+    { id: "jobs_per_employee", label: "Prestations par Employé" },
+    { id: "employee_satisfaction", label: "Satisfaction Employés" },
+    { id: "overtime_hours", label: "Heures Supplémentaires" },
+    { id: "training_completed", label: "Formations Terminées" }
   ],
   vehicle_utilization: [
-    { id: "vehicle_uptime", label: "Disponibilité Véhicules" }, { id: "fuel_efficiency", label: "Consommation Carburant" },
-    { id: "maintenance_costs", label: "Coûts de Maintenance" }, { id: "km_per_job", label: "Km par Prestation" }
+    { id: "vehicle_uptime", label: "Disponibilité Véhicules" },
+    { id: "fuel_efficiency", label: "Consommation Carburant" },
+    { id: "maintenance_costs", label: "Coûts de Maintenance" },
+    { id: "km_per_job", label: "Km par Prestation" }
   ],
 };
-
 
 const ReportsPage = () => {
   const [timeRange, setTimeRange] = useState("last30days");
@@ -165,7 +156,7 @@ const ReportsPage = () => {
   const { toast } = useToast();
 
   const handleDataPointChange = (pointId) => {
-    setSelectedDataPoints(prev => 
+    setSelectedDataPoints(prev =>
       prev.includes(pointId) ? prev.filter(p => p !== pointId) : [...prev, pointId]
     );
   };
@@ -185,23 +176,88 @@ const ReportsPage = () => {
       points: selectedDataPoints.map(dp => dataPointsOptions[selectedReportType]?.find(opt => opt.id === dp)?.label).join(', '),
       period: timeRange,
       format: exportFormat,
-      generatedAt: format(new Date(), "dd/MM/yyyy HH:mm", {locale: fr}),
+      generatedAt: format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr }),
     };
 
-    console.log("Génération du rapport:", reportDetails);
     toast({
-      title: "Rapport généré (simulation)",
+      title: "Rapport généré",
       description: `Type: ${reportDetails.type}. Données: ${reportDetails.points}. Période: ${reportDetails.period}. Format: ${reportDetails.format}.`,
-      action: <Button variant="outline" size="sm" onClick={() => alert(`Téléchargement simulé du rapport en ${exportFormat.toUpperCase()}`)}>Télécharger</Button>
+      action: <Button variant="outline" size="sm" onClick={() => console.log('Download report')}>Télécharger</Button>
     });
   };
 
+  const revenueData = {
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+    datasets: [{
+      label: 'CA Mensuel',
+      data: [12000, 19000, 15000, 25000, 22000, 75890],
+      borderColor: 'rgb(99, 102, 241)',
+      backgroundColor: 'rgba(99, 102, 241, 0.5)',
+      tension: 0.3
+    }]
+  };
+
+  const teamData = {
+    labels: ['Équipe A', 'Équipe B', 'Équipe C'],
+    datasets: [{
+      label: 'Prestations',
+      data: [45, 38, 32],
+      backgroundColor: ['rgba(99, 102, 241, 0.5)', 'rgba(59, 130, 246, 0.5)', 'rgba(147, 51, 234, 0.5)']
+    }]
+  };
+
+  const occupancyData = {
+    labels: ['Occupé', 'Disponible'],
+    datasets: [{
+      data: [78, 22],
+      backgroundColor: ['rgba(99, 102, 241, 0.5)', 'rgba(200, 200, 200, 0.5)']
+    }]
+  };
+
+  const satisfactionData = {
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+    datasets: [{
+      label: 'Note moyenne',
+      data: [4.2, 4.4, 4.5, 4.6, 4.6, 4.7],
+      borderColor: 'rgb(99, 102, 241)',
+      backgroundColor: 'rgba(99, 102, 241, 0.5)',
+      tension: 0.3
+    }]
+  };
 
   const reportData = {
-    financial: { title: "Chiffre d'Affaires Total", value: "75,890 €", icon: <DollarSign />, description: `Sur ${timeRange === "last30days" ? "les 30 derniers jours" : "l'année en cours"}`, chartType: 'line' },
-    teamPerformance: { title: "Prestations par Équipe", value: "Équipe A: 45", icon: <Users />, description: "Meilleure performance", chartType: 'bar' },
-    occupancyRate: { title: "Taux d'Occupation Véhicules", value: "78%", icon: <Truck />, description: "Moyenne de la flotte", chartType: 'pie' },
-    clientSatisfaction: { title: "Satisfaction Client", value: "4.7/5", icon: <TrendingUp />, description: "Basé sur 120 avis", chartType: 'line' },
+    financial: {
+      title: "Chiffre d'Affaires Total",
+      value: "75,890 €",
+      icon: <DollarSign />,
+      description: `Sur ${timeRange === "last30days" ? "les 30 derniers jours" : "l'année en cours"}`,
+      chartType: 'line',
+      data: revenueData
+    },
+    teamPerformance: {
+      title: "Prestations par Équipe",
+      value: "Équipe A: 45",
+      icon: <Users />,
+      description: "Meilleure performance",
+      chartType: 'bar',
+      data: teamData
+    },
+    occupancyRate: {
+      title: "Taux d'Occupation Véhicules",
+      value: "78%",
+      icon: <Truck />,
+      description: "Moyenne de la flotte",
+      chartType: 'pie',
+      data: occupancyData
+    },
+    clientSatisfaction: {
+      title: "Satisfaction Client",
+      value: "4.7/5",
+      icon: <TrendingUp />,
+      description: "Basé sur 120 avis",
+      chartType: 'line',
+      data: satisfactionData
+    },
   };
 
   return (
