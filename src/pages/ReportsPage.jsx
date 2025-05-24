@@ -69,7 +69,16 @@ export default function ReportsPage() {
             <CardTitle>Chiffre d'affaires</CardTitle>
           </CardHeader>
           <CardContent>
-            <Line data={reportData.revenue} options={{ responsive: true }} />
+            <Line 
+            data={{
+              labels: reportData.revenue?.map(d => d.month) || [],
+              datasets: [{
+                label: 'Chiffre d\'affaires',
+                data: reportData.revenue?.map(d => d.total) || []
+              }]
+            }} 
+            options={{ responsive: true }} 
+          />
           </CardContent>
         </Card>
 
@@ -78,7 +87,16 @@ export default function ReportsPage() {
             <CardTitle>Répartition des Services</CardTitle>
           </CardHeader>
           <CardContent>
-            <Pie data={reportData.services} options={{ responsive: true }} />
+            <Pie 
+              data={{
+                labels: reportData.teamPerformance?.map(d => d.equipe) || [],
+                datasets: [{
+                  label: 'Prestations par équipe',
+                  data: reportData.teamPerformance?.map(d => d.total_prestations) || []
+                }]
+              }} 
+              options={{ responsive: true }} 
+            />
           </CardContent>
         </Card>
 
