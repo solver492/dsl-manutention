@@ -1,114 +1,164 @@
 
 # Architecture de la Base de Données - Mon Auxiliaire Déménagement
 
-## Structure Générale
+## Technologies Utilisées
 
-La base de données est conçue pour gérer une entreprise de déménagement avec les entités principales suivantes :
+### Frontend
+- React 18.2.0 avec Vite
+- TailwindCSS pour le styling
+- Radix UI pour les composants
+- Framer Motion pour les animations
 
-### Clients
-- ID (Clé primaire)
-- Nom
-- Adresse
-- Contact
-- Historique des déménagements
+### Stockage de Données (État Actuel)
+- Actuellement, l'application utilise le `localStorage` du navigateur pour simuler une base de données
+- Cette solution est temporaire et destinée uniquement à des fins de démonstration
 
-### Employés
-- ID (Clé primaire) 
-- Nom
-- Poste
-- Équipe
-- Disponibilité
-- Salaire journalier
-- Compétences
+### Recommandation pour la Production
+- **Supabase** est recommandé comme solution de base de données
+  - Base PostgreSQL hautement évolutive
+  - API REST et temps réel intégrée
+  - Authentification et autorisation intégrées
+  - Compatible avec le déploiement sur Replit
 
-### Véhicules
-- ID (Clé primaire)
-- Type
-- Capacité
-- État
-- Disponibilité
+## Structure de la Base de Données
 
-### Prestations
-- ID (Clé primaire)
-- Client (Clé étrangère)
-- Date
-- Adresse départ
-- Adresse arrivée
-- Équipe assignée
-- Véhicule assigné
-- Statut
-- Prix
+### Tables Principales
 
-### Factures
-- ID (Clé primaire)
-- Prestation (Clé étrangère)
-- Montant HT
-- TVA
-- Montant TTC
-- Date émission
-- Date échéance
-- Statut
+#### 1. Clients
+```sql
+CREATE TABLE clients (
+    id UUID PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    adresse TEXT,
+    email VARCHAR(255),
+    telephone VARCHAR(20),
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-## Relations
+#### 2. Employés
+```sql
+CREATE TABLE employes (
+    id UUID PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    poste VARCHAR(50),
+    equipe VARCHAR(50),
+    nb_manutentionnaires_equipe INTEGER,
+    disponibilite VARCHAR(20),
+    salaire_journalier DECIMAL(10,2),
+    telephone VARCHAR(20)
+);
+```
 
-- Un Client peut avoir plusieurs Prestations
-- Une Prestation est liée à un seul Client
-- Une Prestation peut avoir plusieurs Employés (via table de liaison)
-- Une Prestation utilise un ou plusieurs Véhicules
-- Une Facture est liée à une seule Prestation
+#### 3. Véhicules
+```sql
+CREATE TABLE vehicules (
+    id UUID PRIMARY KEY,
+    immatriculation VARCHAR(20) UNIQUE NOT NULL,
+    type VARCHAR(50),
+    etat VARCHAR(20),
+    capacite VARCHAR(20),
+    prochaine_maintenance DATE
+);
+```
 
-## Avantages
+#### 4. Prestations
+```sql
+CREATE TABLE prestations (
+    id UUID PRIMARY KEY,
+    client_id UUID REFERENCES clients(id),
+    date_prestation DATE NOT NULL,
+    adresse_depart TEXT NOT NULL,
+    adresse_arrivee TEXT NOT NULL,
+    statut VARCHAR(20),
+    prix_ht DECIMAL(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-1. **Structure relationnelle optimisée**
-   - Évite la redondance des données
-   - Maintient l'intégrité référentielle
-   - Facilite les requêtes complexes
+#### 5. Factures
+```sql
+CREATE TABLE factures (
+    id UUID PRIMARY KEY,
+    prestation_id UUID REFERENCES prestations(id),
+    montant_ht DECIMAL(10,2) NOT NULL,
+    tva DECIMAL(10,2) NOT NULL,
+    montant_ttc DECIMAL(10,2) NOT NULL,
+    date_emission DATE NOT NULL,
+    date_echeance DATE NOT NULL,
+    statut VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-2. **Évolutivité**
-   - Possibilité d'ajouter de nouvelles entités
-   - Extensible pour de nouvelles fonctionnalités
-   - Supporte la croissance de l'entreprise
+### Tables de Relations
 
-3. **Performance**
-   - Indexation efficace
-   - Optimisation des requêtes
-   - Gestion efficace des relations
+#### 1. Prestation_Employes
+```sql
+CREATE TABLE prestation_employes (
+    prestation_id UUID REFERENCES prestations(id),
+    employe_id UUID REFERENCES employes(id),
+    PRIMARY KEY (prestation_id, employe_id)
+);
+```
 
-4. **Sécurité**
-   - Contrôle d'accès granulaire
-   - Protection des données sensibles
-   - Traçabilité des modifications
+#### 2. Prestation_Vehicules
+```sql
+CREATE TABLE prestation_vehicules (
+    prestation_id UUID REFERENCES prestations(id),
+    vehicule_id UUID REFERENCES vehicules(id),
+    PRIMARY KEY (prestation_id, vehicule_id)
+);
+```
 
-## Inconvénients
+## Avantages de l'Architecture Proposée
 
-1. **Complexité**
-   - Nécessite une bonne compréhension des relations
-   - Maintenance plus exigeante
-   - Requêtes complexes pour certaines opérations
+1. **Intégrité des Données**
+   - Relations bien définies entre les tables
+   - Contraintes de clés étrangères pour maintenir la cohérence
+   - Pas de duplication inutile des données
 
-2. **Performance pour certaines opérations**
-   - Jointures multiples peuvent impacter les performances
-   - Requêtes complexes peuvent être plus lentes
-   - Besoin d'optimisation régulière
-
-3. **Coût de maintenance**
-   - Besoin de surveillance régulière
-   - Nécessite des sauvegardes régulières
-   - Peut nécessiter des ressources dédiées
-
-## Recommandations
-
-1. **Optimisation**
-   - Indexer les champs fréquemment utilisés
-   - Monitorer les performances
-   - Optimiser les requêtes complexes
-
-2. **Maintenance**
-   - Effectuer des sauvegardes régulières
-   - Nettoyer les données obsolètes
-   - Mettre à jour les statistiques
+2. **Scalabilité**
+   - Structure optimisée pour la croissance
+   - Indexes sur les colonnes fréquemment utilisées
+   - Support des requêtes complexes
 
 3. **Sécurité**
-   - Implémenter des rôles et permissions
-   - Chiffrer les données sensibles
-   - Journaliser les accès importants
+   - Authentification robuste via Supabase
+   - Contrôle d'accès granulaire
+   - Chiffrement des données sensibles
+
+4. **Performance**
+   - Requêtes optimisées
+   - Cache intégré avec Supabase
+   - Temps réel pour les mises à jour
+
+## Migration Recommandée
+
+1. **Étapes de Migration**
+   - Créer un projet Supabase sur Replit
+   - Exécuter les scripts de création de tables
+   - Migrer les données du localStorage
+   - Mettre à jour les composants React
+
+2. **Maintenance**
+   - Sauvegardes automatiques
+   - Monitoring des performances
+   - Mises à jour de sécurité
+
+## Bonnes Pratiques
+
+1. **Indexation**
+   - Index sur les colonnes de recherche fréquente
+   - Index sur les clés étrangères
+   - Index composites pour les requêtes complexes
+
+2. **Sécurité**
+   - Utilisation de UUID pour les IDs
+   - Validation des entrées
+   - Contrôle d'accès par rôle
+
+3. **Performance**
+   - Pagination des résultats
+   - Requêtes optimisées
+   - Cache approprié
