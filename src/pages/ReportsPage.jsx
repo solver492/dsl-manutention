@@ -29,8 +29,11 @@ export default function ReportsPage() {
   const [timeRange, setTimeRange] = useState('last30days');
   const [reportData, setReportData] = useState({
     revenue: [],
-    services: [],
-    satisfaction: []
+    teamPerformance: [],
+    satisfaction: {
+      labels: [],
+      datasets: []
+    }
   });
 
   useEffect(() => {
@@ -105,7 +108,26 @@ export default function ReportsPage() {
             <CardTitle>Satisfaction Client</CardTitle>
           </CardHeader>
           <CardContent>
-            <Line data={reportData.satisfaction} options={{ responsive: true }} />
+            <Line 
+              data={{
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                datasets: [{
+                  label: 'Satisfaction Client',
+                  data: [4.5, 4.6, 4.7, 4.8, 4.7, 4.9],
+                  borderColor: 'rgb(75, 192, 192)',
+                  tension: 0.1
+                }]
+              }} 
+              options={{ 
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    max: 5
+                  }
+                }
+              }} 
+            />
           </CardContent>
         </Card>
       </div>
