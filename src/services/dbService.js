@@ -5,16 +5,26 @@ const db = better_sqlite3('database.db');
 // Fonction pour obtenir les données des rapports
 export const getReportData = async (timeRange) => {
   try {
-    // Simuler des données pour le moment
+    const prestations = await getAllPrestations();
+    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
+    
+    // Calculer le chiffre d'affaires par mois
+    const revenue = months.map(month => {
+      const total = prestations
+        .filter(p => new Date(p.date).toLocaleString('fr-FR', { month: 'short' }) === month)
+        .reduce((sum, p) => sum + (p.montant || 0), 0);
+      return { month, total };
+    });
+
+    // Calculer les performances par équipe
+    const teams = [...new Set(prestations.map(p => p.equipe))];
+    const teamPerformance = teams.map(equipe => ({
+      equipe,
+      total_prestations: prestations.filter(p => p.equipe === equipe).length
+    }));
+
     return {
-      revenue: [
-        { month: 'Jan', total: 30000 },
-        { month: 'Fév', total: 35000 },
-        { month: 'Mar', total: 40000 },
-        { month: 'Avr', total: 45000 },
-        { month: 'Mai', total: 50000 },
-        { month: 'Juin', total: 55000 }
-      ],
+      revenue,
       teamPerformance: [
         { equipe: 'Équipe A', total_prestations: 45 },
         { equipe: 'Équipe B', total_prestations: 38 },
