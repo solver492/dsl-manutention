@@ -59,9 +59,22 @@ const InvoicingPage = () => {
   const [montantHT, setMontantHT] = useState(0);
   const { toast } = useToast();
 
-  // Mock data - in a real app, this would come from other modules/API
-  const mockClients = [{id: "CLI001", nom: "Dupont & Fils"}, {id: "CLI002", nom: "Martin SARL"}, {id: "CLI003", nom: "Bernard SA"}];
-  const mockPrestations = [{id: "PRE001", description: "Déménagement Paris"}, {id: "PRE002", description: "Livraison Versailles"}, {id: "PRE003", description: "Garde-meuble Lyon"}];
+  const [clients, setClients] = useState([]);
+  const [prestations, setPrestations] = useState([]);
+
+  useEffect(() => {
+    // Charger les clients
+    const storedClients = localStorage.getItem('clients');
+    if (storedClients) {
+      setClients(JSON.parse(storedClients));
+    }
+
+    // Charger les prestations
+    const storedServices = localStorage.getItem('services');
+    if (storedServices) {
+      setPrestations(JSON.parse(storedServices));
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -260,7 +273,7 @@ const InvoicingPage = () => {
                 <Select name="client" defaultValue={currentInvoice?.client} required>
                   <SelectTrigger><SelectValue placeholder="Sélectionner un client" /></SelectTrigger>
                   <SelectContent>
-                    {mockClients.map(c => <SelectItem key={c.id} value={c.nom}>{c.nom}</SelectItem>)}
+                    {clients.map(c => <SelectItem key={c.id} value={c.nom}>{c.nom}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -269,7 +282,7 @@ const InvoicingPage = () => {
                 <Select name="prestationId" defaultValue={currentInvoice?.prestationId}>
                   <SelectTrigger><SelectValue placeholder="Sélectionner une prestation" /></SelectTrigger>
                   <SelectContent>
-                    {mockPrestations.map(p => <SelectItem key={p.id} value={p.id}>{p.id} - {p.description}</SelectItem>)}
+                    {prestations.map(p => <SelectItem key={p.id} value={p.id}>{p.id} - {p.type} pour {p.client}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
